@@ -31,6 +31,8 @@ class OssLicensesPlugin implements Plugin<Project> {
         getDependencies.outputDir = dependencyOutput
         getDependencies.outputFile = generatedJson
 
+        project.extensions.create("ossLicenses", OssLicensesExtension)
+
         def resourceOutput = new File(dependencyOutput, "/res")
         def outputDir = new File(resourceOutput, "/raw")
         def licensesFile = new File(outputDir, "third_party_licenses")
@@ -39,11 +41,13 @@ class OssLicensesPlugin implements Plugin<Project> {
         def licenseTask = project.tasks.create("generateLicenses", LicensesTask)
 
         licenseTask.dependenciesJson = generatedJson
+        licenseTask.customArtifacts = project.ossLicenses.customArtifacts
         licenseTask.outputDir = outputDir
         licenseTask.licenses = licensesFile
         licenseTask.licensesMetadata = licensesMetadataFile
 
         licenseTask.inputs.file(generatedJson)
+        licenseTask.inputs.property("customArtifacts", project.ossLicenses.customArtifacts)
         licenseTask.outputs.dir(outputDir)
         licenseTask.outputs.files(licensesFile, licensesMetadataFile)
 

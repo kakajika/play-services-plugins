@@ -16,7 +16,7 @@
 
 package com.google.android.gms.oss.licenses.plugin
 
-class ArtifactInfo {
+class ArtifactInfo implements Serializable {
     private String group
     private String name
     private String fileLocation

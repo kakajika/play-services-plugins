@@ -21,6 +21,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.artifacts.result.ResolvedArtifactResult
 import org.gradle.api.internal.artifacts.DefaultModuleIdentifier
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.OutputFile
@@ -58,6 +59,9 @@ class LicensesTask extends DefaultTask {
 
     @InputFile
     public File dependenciesJson
+
+    @Input
+    public List<ArtifactInfo> customArtifacts
 
     @OutputDirectory
     public File outputDir
@@ -100,6 +104,9 @@ class LicensesTask extends DefaultTask {
             } else {
                 addLicensesFromPom(group, name, version)
             }
+        }
+        for (artifact in customArtifacts) {
+            appendLicense(artifact.name, new File(artifact.fileLocation).getBytes())
         }
 
         writeMetadata()
