@@ -213,6 +213,14 @@ class LicensesTask extends DefaultTask {
 
         def rootNode = new XmlSlurper().parse(pomFile)
         if (rootNode.licenses.size() == 0) {
+            def parent = rootNode.parent
+            if (!parent.isEmpty()) {
+                String parentGroup = parent.groupId
+                String parentName = parent.artifactId
+                String parentVersion = parent.version
+                def parentPomFile = resolvePomFileArtifact(parentGroup, parentName, parentVersion)
+                addLicensesFromPom(parentPomFile, group, name)
+            }
             return
         }
 
