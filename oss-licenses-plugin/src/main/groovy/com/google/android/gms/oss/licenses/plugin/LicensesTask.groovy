@@ -63,6 +63,9 @@ class LicensesTask extends DefaultTask {
     @Input
     public List<ArtifactInfo> customArtifacts
 
+    @Input
+    public Closure<Boolean> fetchFromUrl
+
     @OutputDirectory
     public File outputDir
 
@@ -72,11 +75,15 @@ class LicensesTask extends DefaultTask {
     @OutputFile
     public File licensesMetadata
 
+    @OutputDirectory
+    public File contentCacheDir
+
     @TaskAction
     void action() {
         initOutputDir()
         initLicenseFile()
         initLicensesMetadata()
+        initContentCacheDir()
 
         def allDependencies = new JsonSlurper().parse(dependenciesJson)
         for (entry in allDependencies) {
@@ -130,6 +137,12 @@ class LicensesTask extends DefaultTask {
     protected void initLicensesMetadata() {
         licensesMetadata.newWriter().withWriter {w ->
             w << ''
+        }
+    }
+
+    protected void initContentCacheDir() {
+        if (!contentCacheDir.exists()) {
+            contentCacheDir.mkdirs()
         }
     }
 
@@ -236,11 +249,11 @@ class LicensesTask extends DefaultTask {
             rootNode.licenses.license.each { node ->
                 String nodeName = node.name
                 String nodeUrl = node.url
-                appendLicense("${licenseKey} ${nodeName}", nodeUrl.getBytes(UTF_8))
+                appendLicenseUrl("${licenseKey} ${nodeName}", nodeUrl)
             }
         } else {
             String nodeUrl = rootNode.licenses.license.url
-            appendLicense(licenseKey, nodeUrl.getBytes(UTF_8))
+            appendLicenseUrl(licenseKey, nodeUrl)
         }
     }
 
@@ -268,6 +281,27 @@ class LicensesTask extends DefaultTask {
             return null
         }
         return ((ResolvedArtifactResult) artifacts[0]).getFile()
+    }
+
+    protected void appendLicenseUrl(String key, String contentUrl) {
+        if (fetchFromUrl()) {
+            try {
+                def cacheName = UUID.nameUUIDFromBytes(contentUrl.getBytes()).toString()
+                def cacheFile = new File(contentCacheDir, cacheName)
+                if (!cacheFile.exists()) {
+                    logger.info("Fetching license from url. key: ${key} url: ${contentUrl} cache: ${cacheFile}")
+                    ant.get(src: contentUrl, dest: cacheFile.absolutePath)
+                } else {
+                    logger.info("Use license cache. key: ${key} url: ${contentUrl} cache: ${cacheFile}")
+                }
+                appendLicense(key, cacheFile.bytes)
+                return
+            } catch (Exception e) {
+                logger.warn("Fetching license file is failed for key: ${key} url: ${contentUrl}")
+            }
+        }
+
+        appendLicense(key, contentUrl.getBytes(UTF_8))
     }
 
     protected void appendLicense(String key, byte[] content) {

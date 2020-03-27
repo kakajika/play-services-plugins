@@ -40,6 +40,9 @@ class LicensesCleanUpTask extends DefaultTask {
     @Input
     public File licensesDir
 
+    @Input
+    public File contentCacheDir
+
     @TaskAction
     void action() {
         if (dependencyFile.exists()) {
@@ -60,6 +63,10 @@ class LicensesCleanUpTask extends DefaultTask {
 
         if (licensesDir.isDirectory() && licensesDir.list().length == 0) {
             licensesDir.delete()
+        }
+
+        if (contentCacheDir.isDirectory()) {
+            contentCacheDir.delete()
         }
     }
 }
