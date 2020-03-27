@@ -284,8 +284,29 @@ class LicensesTask extends DefaultTask {
     }
 
     protected void appendLicenseUrl(String key, String contentUrl) {
-        if (fetchFromUrl()) {
+        if (fetchFromUrl() && !contentUrl.isEmpty()) {
             try {
+                switch (contentUrl.trim()) {
+                    case ~/https?:\/\/[www.]*apache.org\/licenses\/LICENSE-2\.0\/?/:
+                    case ~/https?:\/\/[www.]*opensource.org\/licenses\/Apache-2\.0/:
+                    case ~/https?:\/\/[www.]*apache.org\/license\/LICENSE-2\.0\.txt/:
+                        contentUrl = "https://www.apache.org/licenses/LICENSE-2.0.txt"
+                        break
+                    case ~/https?:\/\/[www.]*creativecommons.org\/publicdomain\/zero\/1\.0\/?/:
+                        contentUrl = "https://creativecommons.org/publicdomain/zero/1.0/legalcode.txt"
+                        break
+                    case ~/https?:\/\/[www.]*opensource.org\/licenses\/MIT/:
+                    case ~/https?:\/\/[www.]*opensource.org\/licenses\/mit-license\.php/:
+                        contentUrl = "https://mit-license.org/license.txt"
+                        break
+                    case ~/https?:\/\/[www.]*opensource.org\/licenses\/bsd-license[\.php]*/:
+                    case ~/https?:\/\/[www.]*opensource.org\/licenses\/BSD-2-Clause/:
+                        appendLicenseResource(key, "BSD-2-Clause.txt")
+                        return
+                    case ~/https?:\/\/[www.]*developer.android.com\/studio\/terms.html/:
+                        appendLicenseResource(key, "AndroidSDK.txt")
+                        return
+                }
                 def cacheName = UUID.nameUUIDFromBytes(contentUrl.getBytes()).toString()
                 def cacheFile = new File(contentCacheDir, cacheName)
                 if (!cacheFile.exists()) {
@@ -302,6 +323,11 @@ class LicensesTask extends DefaultTask {
         }
 
         appendLicense(key, contentUrl.getBytes(UTF_8))
+    }
+
+    protected void appendLicenseResource(String key, String fileName) {
+        def licenseFile = getClass().classLoader.getResourceAsStream(fileName)
+        appendLicense(key, licenseFile.bytes)
     }
 
     protected void appendLicense(String key, byte[] content) {
