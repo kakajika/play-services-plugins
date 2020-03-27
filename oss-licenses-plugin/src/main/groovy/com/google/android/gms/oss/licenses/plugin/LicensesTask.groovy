@@ -209,12 +209,12 @@ class LicensesTask extends DefaultTask {
 
     protected void addLicensesFromPom(String group, String name, String version) {
         def pomFile = resolvePomFileArtifact(group, name, version)
-        addLicensesFromPom(pomFile, group, name)
+        addLicensesFromPom((File) pomFile, group, name)
     }
 
     protected void addLicensesFromPom(File pomFile, String group, String name) {
         if (pomFile == null || !pomFile.exists()) {
-            logger.error("POM file $pomFile does not exist.")
+            logger.error("POM file $pomFile for $group:$name does not exist.")
             return
         }
 
