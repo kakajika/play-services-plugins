@@ -113,7 +113,7 @@ class LicensesTask extends DefaultTask {
             }
         }
         for (artifact in customArtifacts) {
-            appendLicense(artifact.name, new File(artifact.fileLocation).getBytes())
+            forceAppendLicense(artifact.name, new File(artifact.fileLocation).getBytes())
         }
 
         writeMetadata()
@@ -335,6 +335,12 @@ class LicensesTask extends DefaultTask {
             return
         }
 
+        licensesMap.put(key, "${start}:${content.length}")
+        appendLicenseContent(content)
+        appendLicenseContent(LINE_SEPARATOR)
+    }
+
+    protected void forceAppendLicense(String key, byte[] content) {
         licensesMap.put(key, "${start}:${content.length}")
         appendLicenseContent(content)
         appendLicenseContent(LINE_SEPARATOR)
