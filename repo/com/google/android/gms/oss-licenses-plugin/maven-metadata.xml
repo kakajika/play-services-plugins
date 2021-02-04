@@ -3,11 +3,12 @@
   <groupId>com.google.android.gms</groupId>
   <artifactId>oss-licenses-plugin</artifactId>
   <versioning>
-    <release>0.10.2-patched</release>
+    <release>0.10.2-patched02</release>
     <versions>
       <version>0.10.1-patched</version>
       <version>0.10.2-patched</version>
+      <version>0.10.2-patched02</version>
     </versions>
-    <lastUpdated>20200327131337</lastUpdated>
+    <lastUpdated>20210204063925</lastUpdated>
   </versioning>
 </metadata>
